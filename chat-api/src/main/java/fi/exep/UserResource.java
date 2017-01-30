@@ -50,15 +50,23 @@ public class UserResource {
     public Response loginHandler(@QueryParam("username") String username, @QueryParam("password") String password) {
         username = username.trim();
         password = password.trim();
-        String hash = "";
+        User user = null;
         try {
-            hash = UserRepository.fetchPasswordHash(username);
+            user = UserRepository.fetchUser(username);
         } catch (SQLException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (!BCrypt.checkpw(password, hash)) {
             return Response.status(Status.UNAUTHORIZED).entity("USERNAME/PASSWORD DOESN'T MATCH").build();
         }
-        return Response.status(Status.OK).build();
+        if (user == null || !BCrypt.checkpw(password, user.getBCryptHash())) {
+            return Response.status(Status.UNAUTHORIZED).entity("USERNAME/PASSWORD DOESN'T MATCH").build();
+        }
+        AccessToken token = null;
+        try {
+            token = UserRepository.addAccessToken(user);
+        } catch (SQLException ex) {
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.status(Status.OK).entity(token).build();
     }
 }
