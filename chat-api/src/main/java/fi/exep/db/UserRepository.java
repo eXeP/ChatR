@@ -5,8 +5,8 @@
  */
 package fi.exep.db;
 
-import fi.exep.AccessToken;
-import fi.exep.User;
+import fi.exep.model.AccessToken;
+import fi.exep.model.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,7 +86,7 @@ public class UserRepository {
     public static User fetchUser(String username) throws SQLException {
         Connection connection = null;
         PreparedStatement statement = null;
-        User user;
+        User user = null;
         try {
             connection = Database.getConnection();
             statement = connection.prepareStatement("SELECT * FROM users WHERE username COLLATE UTF8_GENERAL_CI LIKE ?");
@@ -126,5 +126,27 @@ public class UserRepository {
                 connection.close();
         }
         return new AccessToken(token, timeNow, expires, user.getId());
+    }
+    
+    public static AccessToken fetchAccessToken(String tokenString) throws SQLException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        AccessToken token = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement("SELECT * FROM access_tokens WHERE token LIKE ?");
+            statement.setString(1, tokenString);
+            ResultSet resultSet = statement.executeQuery();
+            if (!resultSet.next()) {
+                throw new SQLException();
+            }
+            token = new AccessToken(tokenString, resultSet.getTimestamp(2).getTime(), resultSet.getTimestamp(3).getTime(), resultSet.getLong(4));
+        } finally {
+            if (statement != null)
+                statement.close();
+            if (connection != null)
+                connection.close();
+        }
+        return token;
     }
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.exep;
+package fi.exep.model;
 
 public class User {
     private String username;

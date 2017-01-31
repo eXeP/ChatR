@@ -1,5 +1,8 @@
 package fi.exep;
 
+import fi.exep.model.Responses;
+import fi.exep.model.AccessToken;
+import fi.exep.model.User;
 import fi.exep.db.UserRepository;
 import java.sql.SQLException;
 import java.util.logging.Level;

@@ -1,6 +1,8 @@
-package fi.exep;
+package fi.exep.model;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class AccessToken {
     private String token;
@@ -14,13 +16,16 @@ public class AccessToken {
         this.expires = expires;
         this.userId = userId;
     }
+    
+    public static boolean isAccessTokenValid(AccessToken token) {
+        if(token == null)
+            return false;
+        Long timeNow = System.currentTimeMillis();
+        return (timeNow >= token.getTimeAdded() && timeNow < token.getExpires());
+    }
             
     public static String generateAccessTokenString() {
-        SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[20];
-        random.nextBytes(bytes);
-        String token = bytes.toString();
-        return token;
+        return RandomStringUtils.randomAlphanumeric(20);
     }
 
     public String getToken() {
