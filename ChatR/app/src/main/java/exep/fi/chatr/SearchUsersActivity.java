@@ -43,7 +43,7 @@ public class SearchUsersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        ab.setTitle("Search chats");
+        ab.setTitle("Search users");
 
         application = (ChatRApplication) getApplication();
 

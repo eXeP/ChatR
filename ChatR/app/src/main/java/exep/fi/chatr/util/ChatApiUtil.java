@@ -53,7 +53,7 @@ public class ChatApiUtil {
         params.put("username", encodeUrl(username));
         params.put("displayname", encodeUrl(username));
         params.put("password", password);
-        getAsyncNoToken("user/register", params, handler);
+        postAsyncNoToken("user/register?username="+params.get("username")+"&displayname="+params.get("displayname")+"&password="+params.get("password"), params, handler);
     }
 
     public void getUserChats(AsyncHttpResponseHandler handler) {
@@ -159,7 +159,6 @@ public class ChatApiUtil {
 
 
     private void post(final String resource, final HashMap<String, String> queryParams, final AsyncHttpResponseHandler handler){
-        Log.d("LOL", "TAALLA " + resource);
         postAsync(resource, queryParams, new AsyncHttpResponseHandler() {
             boolean hasFailed = false;
             @Override
@@ -245,6 +244,12 @@ public class ChatApiUtil {
         AsyncHttpClient client = new AsyncHttpClient();
         String url = BASE_URL + resource;
         client.get(url, new RequestParams(queryParams), handler);
+    }
+
+    private void postAsyncNoToken(String resource, HashMap<String, String> queryParams, AsyncHttpResponseHandler handler){
+        AsyncHttpClient client = new AsyncHttpClient();
+        String url = BASE_URL + resource;
+        client.post(url, new RequestParams(queryParams), handler);
     }
 
     private String encodeUrl(String url) {

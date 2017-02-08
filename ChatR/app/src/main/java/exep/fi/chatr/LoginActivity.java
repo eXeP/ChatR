@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private static final String TAG = "LoginActivity";
 
-    private static final String USERNAME_NOT_REGISTERED = "USERNAME DOESNT EXIST";
+    private static final String USERNAME_NOT_REGISTERED = "USERNAME DOESN'T EXIST";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,30 +120,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                if (new String(responseBody).equals(USERNAME_NOT_REGISTERED)) {
-                    credentialsUtil.register(new AsyncHttpResponseHandler() {
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                            credentialsUtil.login(new AsyncHttpResponseHandler() {
-                                @Override
-                                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                                    Log.d(TAG, "Succesfully logged in.");
-                                    goToMainActivity();
-                                }
-
-                                @Override
-                                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                                    showProgress(false);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                            showProgress(false);
-                        }
-                    });
-                }
+                showProgress(false);
             }
         });
     }
@@ -209,8 +186,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    mPasswordView.setError(getString(R.string.error_incorrect_password));
-                    mPasswordView.requestFocus();
+                    if (new String(responseBody).compareTo(USERNAME_NOT_REGISTERED) == 0) {
+                        Log.d(TAG, "log in feilaus reg now");
+                        credentialsUtil.register(new AsyncHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                                Log.d(TAG, "reg succesfull");
+                                credentialsUtil.login(new AsyncHttpResponseHandler() {
+                                    @Override
+                                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                                        Log.d(TAG, "Succesfully logged in.");
+                                        goToMainActivity();
+                                    }
+
+                                    @Override
+                                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                                        Log.d(TAG, "fail " + statusCode + "  " + new String(responseBody));
+                                        showProgress(false);
+                                        credentialsUtil.eraseCredentials();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                                Log.d(TAG, "Reg fail " + statusCode + "  " + new String(responseBody));
+                                credentialsUtil.eraseCredentials();
+                                showProgress(false);
+                            }
+                        });
+                    } else {
+                        credentialsUtil.eraseCredentials();
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                    }
                 }
             });
         }
