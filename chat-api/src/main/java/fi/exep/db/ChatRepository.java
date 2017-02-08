@@ -7,6 +7,7 @@ package fi.exep.db;
 
 import com.mysql.cj.api.jdbc.Statement;
 import fi.exep.model.AccessToken;
+import fi.exep.model.Chat;
 import fi.exep.model.OutgoingMessage;
 import fi.exep.model.User;
 import java.sql.Connection;
@@ -128,6 +129,113 @@ public class ChatRepository {
         return isParticipant;
     }
     
+    public static Chat fetchChat(Long chatId) throws SQLException {
+        Chat chat = null;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT c.id, c.name, c.added, u.username, c.private " +
+                    "FROM chats c " +
+                    "INNER JOIN users u ON c.starter_user_id = u.id " +
+                    "WHERE c.id = ?");
+            statement.setLong(1, chatId);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                chat = new Chat(resultSet.getString(4), resultSet.getLong(1), resultSet.getString(2), resultSet.getTimestamp(3).getTime(), resultSet.getBoolean(5));
+            }
+        } finally {
+            if(statement != null)
+                statement.close();
+            if(connection != null)
+                connection.close();
+        }
+        return chat;
+    }
+    
+    public static ArrayList<Chat> searchChats(String query) throws SQLException {
+        ArrayList<Chat> chats = null;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT c.id, c.name, c.added, u.username, c.private " +
+                    "FROM chats c " +
+                    "INNER JOIN users u ON c.starter_user_id = u.id " +
+                    "WHERE c.name COLLATE UTF8_GENERAL_CI LIKE ? AND c.private = false");
+            statement.setString(1, "%" + query + "%");
+            ResultSet resultSet = statement.executeQuery();
+            chats = parseChats(resultSet);
+        } finally {
+            if(statement != null)
+                statement.close();
+            if(connection != null)
+                connection.close();
+        }
+        return chats;
+    }
+    
+    public static ArrayList<Chat> fetchUserChats(Long userId) throws SQLException {
+        ArrayList<Chat> chats = null;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT DISTINCT p.chat_id, c.name, c.added, u.username, c.private " +
+                    "FROM participation p " +
+                    "INNER JOIN chats c ON p.chat_id = c.id " +
+                    "INNER JOIN users u ON c.starter_user_id = u.id " +
+                    "WHERE p.user_id = ?");
+            statement.setLong(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+            chats = parseChats(resultSet);
+        } finally {
+            if(statement != null)
+                statement.close();
+            if(connection != null)
+                connection.close();
+        }
+        return chats;
+    }
+    
+    public static ArrayList<Chat> parseChats(ResultSet rs) throws SQLException {
+        ArrayList<Chat> chats = new ArrayList<>();
+        rs.beforeFirst();
+        while (rs.next()) {
+            Chat chat = new Chat(rs.getString(4), rs.getLong(1), rs.getString(2), rs.getTimestamp(3).getTime(), rs.getBoolean(5));
+            chats.add(chat);
+        }
+        return chats;
+    }
+    
+    public static ArrayList<OutgoingMessage> fetchNewestMessages(Long chatId, Long count) throws SQLException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ArrayList<OutgoingMessage> messages = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT u.username, u.displayname, m.message, m.sent, m.chat_id, m.id " +
+                    "FROM messages m " + 
+                    "INNER JOIN users u ON m.user_id=u.id " +
+                    "WHERE m.chat_id=? " +
+                    "ORDER BY m.id DESC LIMIT ?");
+            statement.setLong(1, chatId);
+            statement.setLong(2, count);
+            ResultSet resultSet = statement.executeQuery();
+            messages = parseOutgoingMessages(resultSet);
+        } finally {
+            if(statement != null)
+                statement.close();
+            if(connection != null)
+                connection.close();
+        }
+        return messages;
+    }
+    
     public static ArrayList<OutgoingMessage> fetchMessagesAfter(Long chatId, Long messageId) throws SQLException {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -141,6 +249,31 @@ public class ChatRepository {
                     "WHERE m.chat_id=? AND m.id>?");
             statement.setLong(1, chatId);
             statement.setLong(2, messageId);
+            ResultSet resultSet = statement.executeQuery();
+            messages = parseOutgoingMessages(resultSet);
+        } finally {
+            if(statement != null)
+                statement.close();
+            if(connection != null)
+                connection.close();
+        }
+        return messages;
+    }
+    
+    public static ArrayList<OutgoingMessage> fetchMessagesBefore(Long chatId, Long messageId, Long count) throws SQLException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ArrayList<OutgoingMessage> messages = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT u.username, u.displayname, m.message, m.sent, m.chat_id, m.id " +
+                    "FROM messages m " + 
+                    "INNER JOIN users u ON m.user_id=u.id " +
+                    "WHERE m.chat_id=? AND m.id<? ORDER BY m.id DESC LIMIT ?");
+            statement.setLong(1, chatId);
+            statement.setLong(2, messageId);
+            statement.setLong(3, count);
             ResultSet resultSet = statement.executeQuery();
             messages = parseOutgoingMessages(resultSet);
         } finally {

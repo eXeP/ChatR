@@ -5,35 +5,25 @@
  */
 package fi.exep.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fi.exep.db.UserRepository;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  *
  * @author root
  */
 
-@JsonIgnoreProperties({"userId"})
+
 public class IncomingMessage {
-    private String token;
     private Long chatId;
     private String content;   
     
-    private Long userId;
-    
     public IncomingMessage(){}
     
-    public IncomingMessage(String token, String content) {
-        this.token = token;
+    public IncomingMessage(Long chatId, String content) {
+        this.chatId = chatId;
         this.content = content;
-    }
-    
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getContent() {
@@ -42,14 +32,6 @@ public class IncomingMessage {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
     
     public Long getChatId() {

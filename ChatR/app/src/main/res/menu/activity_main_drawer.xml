@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_search"
+            android:icon="@android:drawable/ic_menu_search"
+            android:title="Search chats" />
+        <item
+            android:id="@+id/nav_search_users"
+            android:icon="@android:drawable/ic_menu_search"
+            android:title="Search users" />
+        <item
+            android:id="@+id/nav_create_chat"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="Create a chat" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@android:drawable/ic_lock_power_off"
+            android:title="Log out" />
+    </group>
+
+    <item android:title="Chats">
+        <menu>
+
+        </menu>
+    </item>
+
+</menu>

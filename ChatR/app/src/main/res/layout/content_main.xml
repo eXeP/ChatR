@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="exep.fi.chatr.MainActivity"
+    tools:showIn="@layout/app_bar_main"
+    android:focusableInTouchMode="true">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/message_list"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:background="#fafafa">
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/InnerLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="textPersonName"
+            android:id="@+id/messageEdit"
+            android:textColor="#ffffff"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_send"
+            android:id="@+id/sendButton"
+            android:layout_gravity="center"
+            android:background="@null"/>
+    </LinearLayout>
+
+
+
+
+
+
+
+
+</LinearLayout>

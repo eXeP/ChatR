@@ -5,7 +5,9 @@
  */
 package fi.exep.db;
 
+import static fi.exep.db.ChatRepository.parseChats;
 import fi.exep.model.AccessToken;
+import fi.exep.model.Chat;
 import fi.exep.model.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  *
@@ -148,5 +151,35 @@ public class UserRepository {
                 connection.close();
         }
         return token;
+    }
+    
+    public static ArrayList<String> searchUsers(String query) throws SQLException {
+        ArrayList<String> users = null;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = Database.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT u.username " +
+                    "FROM users u " +
+                    "WHERE u.username COLLATE UTF8_GENERAL_CI LIKE ?");
+            statement.setString(1, "%" + query + "%");
+            ResultSet resultSet = statement.executeQuery();
+            users = parseUsers(resultSet);
+        } finally {
+            if(statement != null)
+                statement.close();
+            if(connection != null)
+                connection.close();
+        }
+        return users;
+    }
+    
+    public static ArrayList<String> parseUsers(ResultSet rs) throws SQLException {
+        ArrayList<String> users = new ArrayList<>();
+        while(rs.next()){
+            users.add(rs.getString(1));
+        }
+        return users;
     }
 }
