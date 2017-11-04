@@ -44,7 +44,6 @@ public class ChatResource {
         AccessToken accessToken = null;
         try {
             accessToken = UserRepository.fetchAccessToken(token);
-            System.out.println("taalla " + accessToken.getUserId());
             if (!AccessToken.isAccessTokenValid(accessToken)) {
                 return Response.status(Status.UNAUTHORIZED).build();
             }
@@ -53,17 +52,14 @@ public class ChatResource {
         }
         
         chatName = chatName.trim();
-        System.out.println("taalla2 " + chatName + " " + isPrivate);
         Long newChatId = null;
         try {
             if(isPrivate) {
-                System.out.println("taall3");
                 User other = UserRepository.fetchUser(username);
                 newChatId = ChatRepository.createNewChat(chatName, accessToken.getUserId(), isPrivate);
                 ChatRepository.addParticipant(accessToken.getUserId(), newChatId);
                 ChatRepository.addParticipant(other.getId(), newChatId);
             } else {
-                System.out.println("taall34");
                 newChatId = ChatRepository.createNewChat(chatName, accessToken.getUserId(), isPrivate);
                 ChatRepository.addParticipant(accessToken.getUserId(), newChatId);
             }
